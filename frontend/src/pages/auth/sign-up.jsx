@@ -69,7 +69,6 @@ const SignUp = () => {
     const [errorMessage, setErrorMessage] = useState('');
 
     useEffect(() => {
-        // Redirect if user is already logged in
         if (user) {
             navigate("/dashboard");
         }
@@ -80,23 +79,12 @@ const SignUp = () => {
             setLoading(true);
             setErrorMessage('');
 
-            // Simulate API call with delay
             await new Promise(resolve => setTimeout(resolve, 1500));
-
-            // Here you would actually call your API
-            // const response = await registerUser({
-            //     firstName: data.firstName,
-            //     lastName: data.lastName,
-            //     email: data.email,
-            //     password: data.password
-            // });
 
             console.log('Registration data:', data);
 
-            // Reset form after successful submission
             reset();
 
-            // Show success message or redirect
             navigate("/sign-in?registered=true");
 
         } catch (error) {

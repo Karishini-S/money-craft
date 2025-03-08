@@ -1,7 +1,6 @@
 import React from "react";
 
 const Label = React.forwardRef(({ className, htmlFor, error, children, ...props }, ref) => {
-    // Combine classes conditionally
     const classNames = [
         "block text-sm font-medium",
         error ? "text-red-500 dark:text-red-400" : "text-gray-700 dark:text-gray-300",

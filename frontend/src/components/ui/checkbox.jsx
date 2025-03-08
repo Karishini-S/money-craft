@@ -10,7 +10,6 @@ const Checkbox = forwardRef(({ className, id, disabled, onChange, ...props }, re
         }
     };
 
-    // Combine classes conditionally
     const classNames = [
         "h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500 dark:border-gray-700 dark:bg-gray-800",
         disabled ? "cursor-not-allowed opacity-50" : "",
