@@ -5,7 +5,10 @@ import SignUp from './pages/auth/sign-up';
 import Dashboard from './pages/dashboard';
 import Settings from './pages/settings';
 import AccountPage from './pages/account-page';
-import Transactions from './pages/transactions'
+import Transactions from './pages/transactions';
+import Leaderboard from './pages/leaderboard';
+import Achievements from './pages/achievements';
+import Navbar from './components/navbar';
 import useStore from './store';
 import { setAuthToken } from './libs/apiCall';
 import { Toaster } from 'sonner';
@@ -14,7 +17,7 @@ const RootLayout = () => {
   const { user } = useStore((state) => state);
   setAuthToken(user?.token || "");
   return !user ? (<Navigate to="/sign-in" replace={true} />) : (<>
-    {/* <Navbar /> */}
+    <Navbar />
     <div className="min-h-[cal(h-screen-100px)]">
       <Outlet />
     </div>
@@ -32,8 +35,10 @@ function App() {
             <Route path="/" element={<Navigate to="/dashboard" />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/transactions" element={<Transactions />} />
+            <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/achievements" element={<Achievements />} />
             <Route path="/settings" element={<Settings />} />
-            <Route path="/account" element={<AccountPage />} />
+            <Route path="/accounts" element={<AccountPage />} />
           </Route>
           <Route path="/sign-in" element={<SignIn />} />
           <Route path="/sign-up" element={<SignUp />} />

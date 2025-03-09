@@ -15,6 +15,8 @@ import { FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
 import { Label } from '../../components/ui/label';
 import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Link } from 'react-router-dom';
+import { toast } from "sonner";
+import api from '../../libs/apiCall';
 
 const RegisterSchema = z.object({
     email: z
@@ -77,19 +79,16 @@ const SignUp = () => {
     const onSubmit = async (data) => {
         try {
             setLoading(true);
-            setErrorMessage('');
-
-            await new Promise(resolve => setTimeout(resolve, 1500));
-
-            console.log('Registration data:', data);
-
-            reset();
-
-            navigate("/sign-in?registered=true");
-
+            const { data: res } = await api.post("/auth/sign-up", data)
+            if (res?.user) {
+                toast.success("Account created successfully! You can now login.")
+                setTimeout(() => {
+                    navigate("/sign-in");
+                }, 1500);
+            }
         } catch (error) {
-            console.error('Registration error:', error);
-            setErrorMessage(error.message || 'Failed to register. Please try again.');
+            console.log(error);
+            toast.error(error?.response?.data?.message || error.message);
         } finally {
             setLoading(false);
         }

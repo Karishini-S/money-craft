@@ -11,7 +11,6 @@ import api from "../libs/apiCall";
 import { auth } from "../libs/firebaseConfig";
 import useStore from "../store";
 import { Button } from "./ui/button";
-import { use } from "react";
 
 export const SocialAuth = ({ isLoading, setLoading }) => {
     const [user] = useAuthState(auth);
@@ -39,9 +38,8 @@ export const SocialAuth = ({ isLoading, setLoading }) => {
                     provider: selectedProvider,
                     uid: user.uid,
                 };
-
-                setLoading(true);
-                const { data: res } = await api.post("/api/auth/sign-in", userData);
+                setLoading(false);
+                const { data: res } = await api.post("/auth/sign-in", userData);
                 console.log(res);
                 if (res?.user) {
                     toast.success(res?.message);
