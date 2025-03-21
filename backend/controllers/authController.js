@@ -1,46 +1,40 @@
-import { pool } from '../libs/database.js';
-import {comparePassword, createJWT, hashPassword} from '../libs/index.js';
+import { pool } from '../config/database.js';
+import {comparePassword, createJWT, hashPassword} from '../config/index.js';
+import { createUser, getUserByEmail } from "../models/UserModel.js";
+import { createProfile } from "../models/profileModel.js";
 
 export const signupUser = async (req, res) => {
     try {
-        const { firstName, lastName, email, password, confirmPassword } = req.body;
+        const { email, username, password, confirmPassword } = req.body;
         if (!(password === confirmPassword)) {
             return res.status(400).json({ 
                 status: "failed",
                 message: "Passwords do not match" 
             });
         }
-        if (!(firstName && email && password && confirmPassword)) {
+        if (!(username && email && password && confirmPassword)) {
             return res.status(404).json({ 
                 status: "failed", 
                 message: "Provide required fields" 
             });
         }
-        const existingUser = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-        if (existingUser.rows.length > 0) {
+        const existingUser = await getUserByEmail(email);
+        if (existingUser) {
             return res.status(400).json({
                 status: "failed",
-                message: "Email already registered"
+                message: "Email is already registered"
             });
         }
-        const hashedPassword = await hashPassword(password);
-        const newUser = await pool.query(
-            "INSERT INTO users (firstname, lastname, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-            [firstName, lastName, email, hashedPassword]
-        );
-        const token = createJWT({ id: newUser.rows[0].id });
-        res.status(201).json({
-            status: "success",
-            message: "User registered successfully",
-            user: newUser.rows[0],
-            token
-        });
+        const hashedPwd = await hashPassword(password);
+        const userId = await createUser(email, username, hashedPwd);
+        await createProfile(userId);
+        res.status(201).json({message:"User registered successfully", userId});
     } catch (error) {
-        console.log(error);
+        console.error("Error registering user: ", error);
         res.status(500).json({
-            status: "failed",
-            message: error.message
-        });
+            status: "Failed",
+            error: "Server error"
+        })
     }
 };
 
@@ -51,22 +45,21 @@ export const signinUser = async (req, res) => {
         if (!email || !password) {
             return res.status(400).json({ 
                 status: "failed", 
-                message: "Provide email and password" 
+                message: "Provide required fields" 
             });
         }
 
-        const { rows } = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
-        
-        if (rows.length === 0) {
+        const user = await getUserByEmail(email);
+
+        if (!user) {
             return res.status(404).json({ 
                 status: "failed", 
                 message: "User not found" 
             });
         }
 
-        const user = rows[0];
-
         const isMatch = await comparePassword(password, user.password);
+
         if (!isMatch) {
             return res.status(401).json({ 
                 status: "failed", 
@@ -74,21 +67,21 @@ export const signinUser = async (req, res) => {
             });
         }
 
-        const token = createJWT({ id: user.id, email: user.email });
+        const token = createJWT({ id: user.user_id, email: user.email_id });
 
         res.json({
             status: "success",
             message: "Logged in successfully",
             user: {
-                id: user.id,
-                email: user.email,
-                firstName: user.first_name,
-                lastName: user.last_name,
+                id: user.user_id,
+                email: user.email_id,
+                username: user.username,
             },
             token
         });
 
     } catch (error) {
+        console.error("Login error:", error);
         res.status(500).json({ 
             status: "failed", 
             message: "Internal Server Error" 

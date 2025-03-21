@@ -1,5 +1,5 @@
-import { getMonthName } from "../libs/index.js";
-import { pool } from "../libs/database.js";
+import { getMonthName } from "../config/index.js";
+import { pool } from "../config/database.js";
 
 export const getTransactions = async (req, res) => {
     try {

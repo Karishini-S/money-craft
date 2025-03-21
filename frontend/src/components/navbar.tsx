@@ -38,13 +38,12 @@ const UserMenu = () => {
     };
 
     const profileInitial = user?.firstName || user?.email.charAt(0);
-    console.log("Profile Initial:", profileInitial);
 
     return (
         <Menu as="div" className="relative">
-            <MenuButton className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800">
-                <div className="flex items-center justify-center w-10 h-10 text-white rounded-full bg-[#59957b]">
-                    <p className="text-black font-bold uppercase">{profileInitial}</p>
+            <MenuButton className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 dark:hover:bg-opacity-70">
+                <div className="flex items-center justify-center w-10 h-10 text-black dark:text-white font-bold uppercase rounded-full bg-[#59957b]">
+                    {profileInitial}
                 </div>
                 <MdOutlineKeyboardArrowDown className="text-xl text-gray-600 dark:text-gray-300" />
             </MenuButton>
@@ -56,7 +55,7 @@ const UserMenu = () => {
                     </div>
                     <MenuItem>
                         {() => (
-                            <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700">
+                            <Link to="/settings/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:bg-opacity-70">
                                 Profile
                             </Link>
                         )}
@@ -65,7 +64,7 @@ const UserMenu = () => {
                         {() => (
                             <button
                                 onClick={handleSignOut}
-                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 dark:hover:bg-red-700"
+                                className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-700 dark:hover:bg-opacity-70"
                             >
                                 Sign Out
                             </button>
@@ -94,43 +93,36 @@ const Navbar = () => {
         }
     };
 
-
     return (
-        <header className="w-full flex items-center justify-between py-4 px-6 bg-[#f2ebc6] dark:bg-slate-900 shadow-md">
+        <header className="w-full flex items-center justify-between py-4 px-6 bg-[#f2ebc6] dark:bg-slate-800 shadow-md">
             <Link to="/" className="flex items-center gap-2">
-                <img src="logo.jpeg" alt="App Logo" className="w-10 h-10 rounded-xl object-cover hover:scale-125" />
+                <img src="logo.jpeg" alt="App Logo" className="w-10 h-10 rounded-xl object-cover scale-150 hover:scale-150" />
+                <span className="text-sm font-bold text-black dark:text-white">.</span>
                 <span className="text-xl font-bold text-black dark:text-white">Money-Craft</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-6">
                 {links.map(({ label, link }) => (
-                    <Link key={link} to={link} className={`px-4 py-2 rounded-full ${location.pathname === link ? "bg-[#59957b] text-white dark:bg-slate-800" : "text-gray-700 dark:text-gray-400"} hover:bg-[#59957b] hover:bg-opacity-50 hover:text-white dark:hover:bg-gray-700`}>
+                    <Link
+                        key={link}
+                        to={link}
+                        className={`px-4 py-2 rounded-full transition-all duration-200 ${location.pathname === link ?
+                            "bg-[#59957b] text-black dark:bg-gray-700 dark:text-white" :
+                            "text-gray-700 dark:text-gray-400"} hover:bg-[#59957b] hover:bg-opacity-70 hover:text-black dark:hover:bg-gray-700 dark:hover:bg-opacity-70 dark:hover:text-white`}
+                    >
                         {label}
                     </Link>
                 ))}
             </nav>
+
             <div className="hidden md:flex items-center gap-4">
-                <MdNotifications size={28} className="text-2xl text-gray-600 dark:text-gray-300 cursor-pointer" />
+                <MdNotifications size={28} className="text-2xl text-gray-600 dark:text-gray-300 cursor-pointer hover:text-black dark:hover:text-white transition-all duration-200" />
                 <ThemeSwitch />
                 <UserMenu />
-                {/*<div className="relative">
-                    <button className="flex items-center gap-2">
-                        <div className="w-10 h-10 flex items-center justify-center rounded-full bg-violet-600 text-white">
-                            {user?.firstName?.charAt(0)}
-                        </div>
-                        <MdOutlineKeyboardArrowDown className="text-xl text-gray-600 dark:text-gray-300 cursor-pointer" />
-                    </button>
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-md shadow-lg">
-                        <div className="p-4 border-b dark:border-gray-700">
-                            <p className="text-lg font-semibold text-violet-700 dark:text-violet-400">{user?.firstName}</p>
-                            <p className="text-sm text-gray-500 dark:text-gray-300">{user?.email}</p>
-                        </div>
-                        <button onClick={handleSignOut} className="w-full px-3 py-2 text-left text-red-600 hover:bg-red-100 dark:hover:bg-red-700 rounded-md text-center">Sign Out</button>
-                    </div>
-                </div>*/}
             </div>
+
             <button className="md:hidden" onClick={() => setOpenSidebar(!openSidebar)}>
-                <IoIosMenu className="text-3xl text-gray-700 dark:text-gray-400" />
+                <IoIosMenu className="text-3xl text-gray-700 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all duration-200" />
             </button>
         </header>
     );

@@ -1,5 +1,5 @@
-import { pool } from "../libs/database.js";
-import { comparePassword, hashPassword } from "../libs/index.js";
+import { pool } from "../config/database.js";
+import { comparePassword, hashPassword } from "../config/index.js";
 
 export const getUser = async(req, res) => {
     try {

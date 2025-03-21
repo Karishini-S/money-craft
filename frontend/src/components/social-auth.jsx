@@ -2,7 +2,7 @@ import {
     GoogleAuthProvider,
     signInWithPopup,
 } from "firebase/auth";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
@@ -14,64 +14,72 @@ import { Button } from "./ui/button";
 
 export const SocialAuth = ({ isLoading, setLoading }) => {
     const [user] = useAuthState(auth);
-    const [selectedProvider, setSelectedProvider] = useState("google");
     const { setCredentials } = useStore((state) => state);
     const navigate = useNavigate();
 
     const signInWithGoogle = async () => {
+        setLoading(true);
         const provider = new GoogleAuthProvider();
-        setSelectedProvider("google");
         try {
-            const res = await signInWithPopup(auth, provider);
-        }
-        catch (error) {
+            await signInWithPopup(auth, provider);
+        } catch (error) {
             console.error("Error in signing in with Google", error);
+            toast.error("Google Sign-in failed. Please try again.");
+            setLoading(false);
         }
     };
 
     useEffect(() => {
         const saveUserToDb = async () => {
+            if (!user) return;
+
+            setLoading(true);
             try {
                 const userData = {
                     name: user.displayName,
                     email: user.email,
-                    provider: selectedProvider,
+                    provider: "google",
                     uid: user.uid,
                 };
-                setLoading(false);
+
                 const { data: res } = await api.post("/auth/sign-in", userData);
-                console.log(res);
+
                 if (res?.user) {
                     toast.success(res?.message);
                     const userInfo = { ...res?.user, token: res?.token };
+
+                    // Store user data efficiently
                     localStorage.setItem("user", JSON.stringify(userInfo));
                     setCredentials(userInfo);
+
                     setTimeout(() => {
                         navigate("/dashboard");
                     }, 1500);
                 }
-            }
-            catch (error) {
+            } catch (error) {
                 console.error("Something went wrong.", error);
                 toast.error(error?.response?.data?.message || error.message);
-            }
-            finally {
+            } finally {
                 setLoading(false);
             }
         };
-        if (user) {
-            saveUserToDb();
-        }
-    }, [user?.uid]);
+
+        if (user) saveUserToDb();
+    }, [user]); // Fixed dependency array
 
     return (
-        <div className="flex items-center gap-2">
-            <Button onClick={signInWithGoogle} disabled={isLoading} variant="outline"
+        <div></div>
+        /*<div className="flex items-center gap-2">
+            <Button
+                onClick={signInWithGoogle}
+                disabled={isLoading}
+                variant="outline"
                 className="w-full text-sm font-normal dark:bg-transparent dark:border-gray-800 dark:text-gray-400"
-                type="button">
+                type="button"
+            >
                 <FcGoogle className="mr-2 size-5" />
                 Continue with Google
             </Button>
-        </div>
+        </div>*/
     );
 };
