@@ -28,6 +28,18 @@ export const signupUser = async (req, res) => {
         const hashedPwd = await hashPassword(password);
         const userId = await createUser(email, username, hashedPwd);
         await createProfile(userId);
+        const defaultCategories = await pool.query(
+            "SELECT category_name, category_type FROM category WHERE user_id = 0"
+        );
+
+        for (const cat of defaultCategories.rows) {
+            await pool.query(
+                `INSERT INTO category (category_name, category_type, user_id)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (category_name, category_type, user_id) DO NOTHING`,
+                [cat.category_name, cat.category_type, userId]
+            );
+        }
         res.status(201).json({message:"User registered successfully", userId});
     } catch (error) {
         console.error("Error registering user: ", error);

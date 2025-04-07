@@ -16,7 +16,8 @@ Trial_1
 │  │  └─ authMiddleware.js
 │  ├─ models
 │  │  ├─ profileModel.js
-│  │  └─ usersModel.js
+│  │  ├─ transactionModel.js
+│  │  └─ userModel.js
 │  ├─ package-lock.json
 │  ├─ package.json
 │  └─ routes
@@ -41,6 +42,8 @@ Trial_1
 │  │  ├─ assets
 │  │  │  └─ react.svg
 │  │  ├─ components
+│  │  │  ├─ editCategoryAssets.jsx
+│  │  │  ├─ editSample.jsx
 │  │  │  ├─ navbar.tsx
 │  │  │  ├─ separator.jsx
 │  │  │  ├─ social-auth.jsx
@@ -56,7 +59,6 @@ Trial_1
 │  │  │     ├─ dialog-wrapper.jsx
 │  │  │     └─ transition-wrapper.jsx
 │  │  ├─ features
-│  │  │  ├─ account-page.jsx
 │  │  │  ├─ achievements.jsx
 │  │  │  ├─ add-transaction.jsx
 │  │  │  ├─ auth
@@ -66,6 +68,7 @@ Trial_1
 │  │  │  ├─ expense-summary.jsx
 │  │  │  ├─ goal-tracking.jsx
 │  │  │  ├─ leaderboard.jsx
+│  │  │  ├─ profile.jsx
 │  │  │  ├─ recent-transactions.jsx
 │  │  │  ├─ set-goal.jsx
 │  │  │  ├─ settings.jsx

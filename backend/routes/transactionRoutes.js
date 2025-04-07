@@ -1,9 +1,9 @@
 import express from "express";
-import { getTransactions } from "../controllers/transactionController.js";
+import { addTransactions } from "../controllers/transactionController.js";
 import authMiddleware from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", authMiddleware, getTransactions);
+router.post("/add",addTransactions);
 
 export default router;

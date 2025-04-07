@@ -24,7 +24,7 @@ const Dashboard = ({ transactions, setTransactions }) => {
 
     return (
         <div className="p-6 grid gap-6">
-            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">Home</h1>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-6">

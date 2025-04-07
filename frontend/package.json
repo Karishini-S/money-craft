@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@coreui/icons": "^3.0.1",
+    "@coreui/icons-react": "^2.3.0",
     "@headlessui/react": "^2.0.3",
     "axios": "^1.6.8",
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",
     "firebase": "^10.13.0",
+    "framer-motion": "^12.6.3",
+    "lucide-react": "^0.487.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",

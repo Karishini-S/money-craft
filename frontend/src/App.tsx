@@ -31,7 +31,7 @@ function App() {
 
   return (
     <main>
-      <div className="w-full min-h-screen px-6 bg-gray-100 md:px-20 dark:bg-slate-900">
+      <div className="w-full min-h-screen px-6 bg-[#f4f4ed] md:px-20 dark:bg-slate-900">
         <Routes>
           <Route element={<RootLayout />}>
             <Route path="/" element={<Navigate to="/dashboard" />} />

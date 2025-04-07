@@ -15,11 +15,11 @@ import ThemeSwitch from "./switch";
 import TransitionWrapper from "./wrappers/transition-wrapper";
 
 const links = [
-    { label: "Dashboard", link: "/dashboard" },
+    { label: "Home", link: "/dashboard" },
     { label: "Transactions", link: "/transactions" },
     { label: "Leaderboard", link: "/leaderboard" },
     { label: "Achievements", link: "/achievements" },
-    { label: "Settings", link: "/settings" }
+    { label: "Settings", link: "/settings" },
 ];
 
 const UserMenu = () => {
@@ -48,7 +48,7 @@ const UserMenu = () => {
                 <MdOutlineKeyboardArrowDown className="text-xl text-gray-600 dark:text-gray-300" />
             </MenuButton>
             <TransitionWrapper>
-                <MenuItems className="absolute right-0 w-56 mt-2 bg-white dark:bg-gray-900 rounded-lg shadow-md divide-y divide-gray-200 dark:divide-gray-700">
+                <MenuItems className="fixed right-24 w-56 mt-0 border bg-white dark:border-slate-700 dark:bg-slate-800 rounded-lg shadow-md divide-y divide-gray-200 dark:divide-gray-700">
                     <div className="p-4">
                         <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">{user?.firstName}</p>
                         <span className="text-xs text-gray-500 dark:text-gray-400">{user?.email}</span>
@@ -106,9 +106,10 @@ const Navbar = () => {
                     <Link
                         key={link}
                         to={link}
-                        className={`px-4 py-2 rounded-full transition-all duration-200 ${location.pathname === link ?
-                            "bg-[#59957b] text-black dark:bg-gray-700 dark:text-white" :
-                            "text-gray-700 dark:text-gray-400"} hover:bg-[#59957b] hover:bg-opacity-70 hover:text-black dark:hover:bg-gray-700 dark:hover:bg-opacity-70 dark:hover:text-white`}
+                        className={`px-4 py-2 rounded-full transition-all duration-200 ${location.pathname === link
+                            ? "bg-[#59957b] text-black dark:bg-[#2f4f4f] dark:text-white"
+                            : "text-gray-700 dark:text-gray-300"
+                            } hover:bg-[#59957b] hover:bg-opacity-70 hover:text-black dark:hover:bg-[#3a5f5f] dark:hover:bg-opacity-80 dark:hover:text-white`}
                     >
                         {label}
                     </Link>
@@ -122,7 +123,7 @@ const Navbar = () => {
             </div>
 
             <button className="md:hidden" onClick={() => setOpenSidebar(!openSidebar)}>
-                <IoIosMenu className="text-3xl text-gray-700 dark:text-gray-400 hover:text-black dark:hover:text-white transition-all duration-200" />
+                <IoIosMenu className="text-3xl text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white transition-all duration-200" />
             </button>
         </header>
     );

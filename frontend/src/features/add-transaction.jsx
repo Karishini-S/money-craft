@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from "react";
+import { LuPencil } from "react-icons/lu";
+import EditCategoriesAssets from "../components/editCategoryAssets";
+import EditSample from "../components/editSample";
 
 const AddTransaction = ({ onAddTransaction }) => {
     const [transactionType, setTransactionType] = useState("");
     const [amount, setAmount] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [asset, setAsset] = useState("");
     const [category, setCategory] = useState("");
-    const [newCategory, setNewCategory] = useState("");
-    const [userCategories, setUserCategories] = useState({ income: [], expense: [] });
+    const [userCategories, setUserCategories] = useState({ income: [], expense: [], assets: [] });
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [formError, setFormError] = useState("");
 
-    // Define categories
-    const incomeCategories = ["Salary", "Freelance", "Investments", "Bonus", "Other Income"];
-    const expenseCategories = ["Food", "Transport", "Rent", "Entertainment", "Shopping", "Other Expense"];
+    // Default categories
+    const incomeCategories = ["Salary", "Freelance", "Investments", "Bonus", "Other"];
+    const expenseCategories = ["Food", "Transport", "Rent", "Entertainment", "Other"];
+    const assetsCategories = ["Cash", "Card", "Other"];
 
     const getCategories = () => {
         return transactionType === "income"
@@ -21,46 +26,24 @@ const AddTransaction = ({ onAddTransaction }) => {
                 : [];
     };
 
-    useEffect(() => {
-        const storedCategories = JSON.parse(localStorage.getItem("userCategories")) || { income: [], expense: [] };
-        setCategory(""); // Reset category when type changes
-    }, [transactionType]);
-
-    const handleAddCategory = () => {
-        if (!newCategory.trim()) return;
-
-        setUserCategories((prev) => {
-            const updatedCategories = {
-                ...prev,
-                [transactionType]: [...prev[transactionType], newCategory.trim()],
-            };
-            localStorage.setItem("userCategories", JSON.stringify(updatedCategories)); // Save to localStorage
-            return updatedCategories;
-        });
-
-        setNewCategory(""); // Reset input field
+    const getAssets = () => {
+        return [...assetsCategories, ...userCategories.assets];
     };
+
+    useEffect(() => {
+        const storedCategories = JSON.parse(localStorage.getItem("userCategories")) || { income: [], expense: [], assets: [] };
+        setUserCategories(storedCategories);
+        setCategory("");
+        setAsset("");
+    }, [transactionType]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (!transactionType) {
-            setFormError("Please select a transaction type.");
-            return;
-        }
-        if (!category) {
-            setFormError("Please select a category.");
-            return;
-        }
-        if (!amount) {
-            setFormError("Please enter an amount.");
-            return;
-        }
-        if (!date) {
-            setFormError("Please select a date.");
-            return;
-        }
-
-        setFormError(""); // Clear error when all fields are valid        
+        if (!transactionType) return setFormError("Please select a transaction type.");
+        if (!category) return setFormError("Please select a category.");
+        if (!amount) return setFormError("Please enter an amount.");
+        if (!date) return setFormError("Please select a date.");
+        setFormError(""); // Clear errors when valid
 
         const numericAmount = parseFloat(amount);
         const finalAmount = transactionType === "income" ? Math.abs(numericAmount) : -Math.abs(numericAmount);
@@ -70,20 +53,37 @@ const AddTransaction = ({ onAddTransaction }) => {
             type: transactionType,
             amount: finalAmount,
             date,
-            category
+            category,
+            asset
         };
 
         onAddTransaction(newTransaction);
-
-        // Reset form fields
         setTransactionType("");
         setAmount("");
         setCategory("");
     };
 
     return (
-        <div className="p-6 bg-[#f2ebc6] dark:bg-slate-800 rounded-lg shadow-md transition-all duration-300">
+        <div className="p-6 bg-[#f2ebc6] dark:bg-slate-800 rounded-lg shadow-md transition-all duration-300 relative">
             <h2 className="text-lg font-semibold mb-4 text-gray-800 dark:text-white">Add Transaction</h2>
+
+            <button
+                onClick={() => setIsEditModalOpen(true)}
+                className="absolute top-7 right-6 text-gray-600 dark:text-gray-300 hover:text-gray-800 dark:hover:text-white"
+            >
+                <LuPencil size={20} />
+            </button>
+
+            {isEditModalOpen && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+                    <EditSample
+                        closeModal={() => setIsEditModalOpen(false)}
+                        userCategories={userCategories}
+                        setUserCategories={setUserCategories}
+                    />
+                </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 {formError && (
@@ -92,7 +92,6 @@ const AddTransaction = ({ onAddTransaction }) => {
                     </div>
                 )}
 
-                {/* Transaction Type & Category */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="text-gray-700 dark:text-gray-300 block mb-1">Transaction Type</label>
@@ -123,29 +122,20 @@ const AddTransaction = ({ onAddTransaction }) => {
                     </div>
                 </div>
 
-                {transactionType && (
-                    <div className="flex items-center gap-2">
-                        <input
-                            type="text"
-                            placeholder={`Add new ${transactionType} category`}
-                            value={newCategory}
-                            onChange={(e) => setNewCategory(e.target.value)}
-                            className="w-full text-gray-700 dark:text-gray-300 p-2 rounded bg-white dark:bg-gray-700"
-                        />
-                        <button
-                            type="button"
-                            onClick={handleAddCategory}
-                            className="px-4 py-2 text-white bg-gradient-to-r from-[#59957b] to-[#456f5c] rounded-lg 
-                        shadow-md hover:from-[#456f5c] hover:to-[#59957b] transition-transform transform 
-                        focus:outline-none focus:ring-2 focus:ring-[#59957b]"
-                        >
-                            Add
-                        </button>
-                    </div>
+                <div>
+                    <label className="text-gray-700 dark:text-gray-300 block mb-1">Asset</label>
+                    <select
+                        value={asset}
+                        onChange={(e) => setAsset(e.target.value)}
+                        className="w-full p-2 rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700"
+                    >
+                        <option value="">--Select Asset--</option>
+                        {getAssets().map((assetName, index) => (
+                            <option key={index} value={assetName}>{assetName}</option>
+                        ))}
+                    </select>
+                </div>
 
-                )}
-
-                {/* Amount & Date Inputs */}
                 <div className="grid grid-cols-2 gap-4">
                     <div>
                         <label className="text-gray-700 dark:text-gray-300 block mb-1">Amount</label>
@@ -172,8 +162,7 @@ const AddTransaction = ({ onAddTransaction }) => {
                 <button
                     type="submit"
                     className="w-full px-5 py-2 text-white bg-gradient-to-r from-[#59957b] to-[#456f5c] rounded-lg 
-                shadow-md hover:from-[#456f5c] hover:to-[#59957b] transition-transform transform 
-                focus:outline-none focus:ring-2 focus:ring-[#59957b]"
+                shadow-md hover:from-[#456f5c] hover:to-[#59957b] transition-transform transform"
                 >
                     Add Transaction
                 </button>
