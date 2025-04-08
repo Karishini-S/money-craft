@@ -3,7 +3,6 @@ import { pool } from "../config/database.js";
 const defaultCategories = {
   income: ["Salary", "Freelance", "Investments", "Bonus", "Other"],
   expense: ["Food", "Transport", "Rent", "Entertainment", "Other"],
-  asset: ["Cash", "Card", "Other"]
 };
 
 async function seedDefaults() {

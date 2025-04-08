@@ -332,6 +332,10 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
         ...(userCategories.assets || []),
     ];
 
+    console.log("User categories:", userCategories);
+    console.log("allCategories", allCategories);
+    console.log("allAssets:", allAssets);
+
     return (
         <AnimatePresence mode="wait">
             <motion.div
@@ -407,7 +411,7 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
                                     {allCategories.length > 0 ? (
                                         allCategories.map((cat) => (
                                             <motion.div
-                                                key={`${selectedType}-${cat}`}
+                                                key={`${selectedType}-${cat.cat_id}`}
                                                 initial={{ opacity: 0, scale: 0.95 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 exit={{ opacity: 0, scale: 0.95 }}

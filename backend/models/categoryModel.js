@@ -1,13 +1,13 @@
 import { pool } from "../config/database.js";
 
 export async function assignDefaultCategoriesToUser(userId) {
-  const { rows: defaults } = await pool.query(`SELECT dcat_id, dcat_type FROM default_category`);
+  const { rows: defaults } = await pool.query(`SELECT dcat_id, dcat_name, dcat_type FROM default_category`);
   
   const inserts = defaults.map(dc =>
     pool.query(
-      `INSERT INTO user_category (user_id, dcat_id, cat_type, is_default)
-       VALUES ($1, $2, $3, $4)`,
-      [userId, dc.dcat_id, dc.dcat_type, true]
+      `INSERT INTO user_category (user_id, dcat_id, cat_name, cat_type, is_default)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [userId, dc.dcat_id, dc.dcat_name, dc.dcat_type, true]
     )
   );
 

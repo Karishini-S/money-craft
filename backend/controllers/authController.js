@@ -3,6 +3,7 @@ import {comparePassword, createJWT, hashPassword} from '../config/index.js';
 import { createUser, getUserByEmail } from "../models/UserModel.js";
 import { createProfile } from "../models/profileModel.js";
 import { assignDefaultCategoriesToUser } from '../models/categoryModel.js';
+import { assignDefaultAssetsToUser } from '../models/assetModel.js';
 
 export const signupUser = async (req, res) => {
     try {
@@ -29,7 +30,8 @@ export const signupUser = async (req, res) => {
         const hashedPwd = await hashPassword(password);
         const userId = await createUser(email, username, hashedPwd);
         await createProfile(userId);
-        await assignDefaultCategoriesToUser(userId);
+        //await assignDefaultCategoriesToUser(userId);
+        await assignDefaultAssetsToUser(userId);
         /*const defaultCategories = await pool.query(
             "SELECT category_name, category_type FROM category WHERE user_id = 0"
         );
