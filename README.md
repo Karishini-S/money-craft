@@ -7,7 +7,9 @@ Trial_1
 │  │  ├─ database.js
 │  │  └─ index.js
 │  ├─ controllers
+│  │  ├─ assetController.js
 │  │  ├─ authController.js
+│  │  ├─ categoryController.js
 │  │  ├─ profileController.js
 │  │  ├─ transactionController.js
 │  │  └─ userController.js
@@ -15,17 +17,23 @@ Trial_1
 │  ├─ middleware
 │  │  └─ authMiddleware.js
 │  ├─ models
+│  │  ├─ assetModel.js
+│  │  ├─ categoryModel.js
 │  │  ├─ profileModel.js
 │  │  ├─ transactionModel.js
 │  │  └─ userModel.js
 │  ├─ package-lock.json
 │  ├─ package.json
-│  └─ routes
-│     ├─ accountRoutes.js
-│     ├─ authRoutes.js
-│     ├─ index.js
-│     ├─ transactionRoutes.js
-│     └─ userRoutes.js
+│  ├─ routes
+│  │  ├─ accountRoutes.js
+│  │  ├─ assetRoutes.js
+│  │  ├─ authRoutes.js
+│  │  ├─ categoryRoutes.js
+│  │  ├─ index.js
+│  │  ├─ transactionRoutes.js
+│  │  └─ userRoutes.js
+│  └─ seeder
+│     └─ seedDefaultCategories.js
 ├─ frontend
 │  ├─ .env.local
 │  ├─ eslint.config.js
@@ -76,6 +84,10 @@ Trial_1
 │  │  │  └─ transactions.jsx
 │  │  ├─ index.css
 │  │  ├─ libs
+│  │  │  ├─ api
+│  │  │  │  ├─ addTransaction.js
+│  │  │  │  ├─ fetchUserAssets.js
+│  │  │  │  └─ fetchUserCategories.js
 │  │  │  ├─ apiCall.js
 │  │  │  └─ firebaseConfig.js
 │  │  ├─ main.jsx

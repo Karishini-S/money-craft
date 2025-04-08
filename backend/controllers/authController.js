@@ -2,6 +2,7 @@ import { pool } from '../config/database.js';
 import {comparePassword, createJWT, hashPassword} from '../config/index.js';
 import { createUser, getUserByEmail } from "../models/UserModel.js";
 import { createProfile } from "../models/profileModel.js";
+import { assignDefaultCategoriesToUser } from '../models/categoryModel.js';
 
 export const signupUser = async (req, res) => {
     try {
@@ -28,7 +29,8 @@ export const signupUser = async (req, res) => {
         const hashedPwd = await hashPassword(password);
         const userId = await createUser(email, username, hashedPwd);
         await createProfile(userId);
-        const defaultCategories = await pool.query(
+        await assignDefaultCategoriesToUser(userId);
+        /*const defaultCategories = await pool.query(
             "SELECT category_name, category_type FROM category WHERE user_id = 0"
         );
 
@@ -39,7 +41,7 @@ export const signupUser = async (req, res) => {
                 ON CONFLICT (category_name, category_type, user_id) DO NOTHING`,
                 [cat.category_name, cat.category_type, userId]
             );
-        }
+        }*/
         res.status(201).json({message:"User registered successfully", userId});
     } catch (error) {
         console.error("Error registering user: ", error);
@@ -79,7 +81,7 @@ export const signinUser = async (req, res) => {
             });
         }
 
-        const token = createJWT({ id: user.user_id, email: user.email_id });
+        const token = createJWT( user.user_id );
 
         res.json({
             status: "success",

@@ -8,6 +8,7 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
     const [assetErrorMessage, setAssetErrorMessage] = useState("");
     const [newCategory, setNewCategory] = useState("");
     const [newAsset, setNewAsset] = useState("");
+    const [minBalance, setMinBalance] = useState("");
     const [selectedType, setSelectedType] = useState("income");
     const [removedCategories, setRemovedCategories] = useState(() => {
         return JSON.parse(localStorage.getItem("removedCategories")) || {
@@ -17,11 +18,11 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
         };
     });
 
-    const defaultIncomeCategories = ["Salary", "Freelance", "Investments", "Bonus", "Other"];
-    const defaultExpenseCategories = ["Food", "Transport", "Rent", "Entertainment", "Other"];
-    const defaultAssetCategories = ["Cash", "Card", "Other"];
+    //const defaultIncomeCategories = ["Salary", "Freelance", "Investments", "Bonus", "Other"];
+    //const defaultExpenseCategories = ["Food", "Transport", "Rent", "Entertainment", "Other"];
+    //const defaultAssetCategories = ["Cash", "Card", "Other"];
 
-    useEffect(() => {
+    /*useEffect(() => {
         const stored = JSON.parse(localStorage.getItem("removedCategories"));
         if (!stored || !stored.income || !stored.expense || !stored.assets) {
             localStorage.setItem(
@@ -29,7 +30,7 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
                 JSON.stringify({ income: [], expense: [], assets: [] })
             );
         }
-    }, []);
+    }, []);*/
 
     useEffect(() => {
         if (categoryErrorMessage) {
@@ -51,12 +52,121 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
         }
     }, [assetErrorMessage]);
 
+    const fetchAllCategories = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/api/categories/category", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            const data = await response.json();
+
+            // Normalize the data structure to handle both array of strings and array of objects
+            const normalizeCategories = (categories) => {
+                if (!categories) return [];
+                return categories.map(cat => typeof cat === 'string' ? cat : cat.cat_name || cat.name || cat);
+            };
+
+            return {
+                income: normalizeCategories(data.income),
+                expense: normalizeCategories(data.expense),
+                assets: normalizeCategories(data.assets),
+            };
+
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            // Return default empty categories in case of error
+            return {
+                income: [],
+                expense: [],
+                assets: [],
+            };
+        }
+    };
+
+    const fetchAllAssets = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/api/assets/asset", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await response.json();
+
+            const normalizeAssets = (assets) => {
+                if (!assets) return [];
+                return assets.map(asset => {
+                    return {
+                        id: asset.id || asset.asset_id || generateUniqueId(),
+                        name: asset.name || asset.asset_name,
+                        minBal: asset.minimum_balance || 0
+                    };
+                });
+            };
+            return normalizeAssets(data.assets || []);
+        } catch (error) {
+            console.error("Error fetching assets:", error);
+            return [];
+        }
+    }
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            const categories = await fetchAllCategories();
+            setUserCategories(categories);
+        };
+
+        loadCategories();
+    }, []);
+
+    useEffect(() => {
+        const loadAssets = async () => {
+            const assets = await fetchAllAssets();
+            setUserCategories(prev => ({
+                ...prev,
+                assets: assets,
+            }));
+        };
+
+        loadAssets();
+    }, []);
+
     const defaultUserCategories = { income: [], expense: [], assets: [] };
     userCategories = userCategories || defaultUserCategories;
 
-    const handleAddCategory = () => {
+    const handleAddCategory = async () => {
         if (!newCategory.trim()) return;
-        setUserCategories((prev) => {
+        try {
+            const response = await fetch("http://localhost:5000/api/categories/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    name: newCategory.trim(),
+                    type: selectedType,
+                }),
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setUserCategories((prev) => ({
+                    ...prev,
+                    [selectedType]: [...(prev[selectedType] || []), data.cat_name],
+                }));
+                setNewCategory("");
+            }
+            const updatedCategories = await fetchAllCategories();
+            setUserCategories(updatedCategories);
+        } catch (error) {
+            console.error("Error adding category:", error);
+        }
+        /*setUserCategories((prev) => {
             const updated = {
                 ...prev,
                 [selectedType]: [...(prev[selectedType] || []), newCategory.trim()],
@@ -64,12 +174,42 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
             localStorage.setItem("userCategories", JSON.stringify(updated));
             return updated;
         });
-        setNewCategory("");
+        setNewCategory("");*/
     };
 
-    const handleAddAsset = () => {
+    const handleAddAsset = async () => {
         if (!newAsset.trim()) return;
-        setUserCategories((prev) => {
+        const minBalToSend = minBalance || 0;
+        try {
+            const response = await fetch("http://localhost:5000/api/assets/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    name: newAsset.trim(),
+                    minBal: minBalToSend,
+                }),
+            });
+            if (response.ok) {
+                /*const data = await response.json();
+                setUserCategories((prev) => ({
+                    ...prev,
+                    assets: [...(prev.assets || []), data.name],
+                }));*/
+                const updatedAssets = await fetchAllAssets();
+                setUserCategories(prev => ({
+                    ...prev,
+                    assets: updatedAssets,
+                }));
+                setNewAsset("");
+                setMinBalance("");
+            }
+        } catch (error) {
+            console.error("Error adding asset:", error);
+        }
+        /*setUserCategories((prev) => {
             const updated = {
                 ...prev,
                 assets: [...(prev.assets || []), newAsset.trim()],
@@ -77,11 +217,34 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
             localStorage.setItem("userCategories", JSON.stringify(updated));
             return updated;
         });
-        setNewAsset("");
+        setNewAsset("");*/
     };
 
-    const handleDeleteCategory = (categoryToDelete) => {
-        const isDefault =
+    const handleDeleteCategory = async (categoryToDelete) => {
+        try {
+            const response = await fetch("http://localhost:5000/api/categories/delete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    name: categoryToDelete,
+                    type: selectedType,
+                }),
+            });
+            if (response.ok) {
+                setUserCategories((prev) => ({
+                    ...prev,
+                    [selectedType]: prev[selectedType].filter((cat) => cat !== categoryToDelete),
+                }));
+            }
+            const updatedCategories = await fetchAllCategories();
+            setUserCategories(updatedCategories);
+        } catch (error) {
+            console.error("Error deleting category:", error);
+        }
+        /*const isDefault =
             (selectedType === "income" && defaultIncomeCategories.includes(categoryToDelete)) ||
             (selectedType === "expense" && defaultExpenseCategories.includes(categoryToDelete)); // if needed
 
@@ -97,11 +260,32 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
             };
             localStorage.setItem("userCategories", JSON.stringify(updated));
             return updated;
-        });
+        });*/
     };
 
-    const handleDeleteAsset = (assetToDelete) => {
-        const isDefault = defaultAssetCategories.includes(assetToDelete);
+    const handleDeleteAsset = async (assetToDelete) => {
+        try {
+            const result = await fetch("http://localhost:5000/api/assets/delete", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    name: assetToDelete,
+                }),
+            });
+            if (result.ok) {
+                const updatedAssets = await fetchAllAssets();
+                setUserCategories((prev) => ({
+                    ...prev,
+                    assets: updatedAssets,
+                }));
+            }
+        } catch (error) {
+            console.error("Error deleting asset:", error);
+        }
+        /*const isDefault = defaultAssetCategories.includes(assetToDelete);
 
         if (isDefault) {
             setAssetErrorMessage(`"${assetToDelete}" is a default category and cannot be deleted.`);
@@ -125,23 +309,26 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
                 localStorage.setItem("removedCategories", JSON.stringify(updated));
                 return updated;
             });
-        }
+        }*/
     };
 
-    const defaultCategories =
-        selectedType === "income" ? defaultIncomeCategories : defaultExpenseCategories;
+    /*const defaultCategories =
+        selectedType === "income" ? defaultIncomeCategories : defaultExpenseCategories;*/
 
-    const allCategories = [
+    /*const allCategories = [
         ...(defaultCategories.filter((cat) =>
             Array.isArray(removedCategories[selectedType])
                 ? !removedCategories[selectedType].includes(cat)
                 : true
         )),
         ...(userCategories[selectedType] || []),
+    ];*/
+    const allCategories = [
+        ...(userCategories[selectedType] || []),
     ];
 
     const allAssets = [
-        ...defaultAssetCategories.filter((cat) => !(removedCategories.assets || []).includes(cat)),
+        //...defaultAssetCategories.filter((cat) => !(removedCategories.assets || []).includes(cat)),
         ...(userCategories.assets || []),
     ];
 
@@ -220,7 +407,7 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
                                     {allCategories.length > 0 ? (
                                         allCategories.map((cat) => (
                                             <motion.div
-                                                key={cat}
+                                                key={`${selectedType}-${cat}`}
                                                 initial={{ opacity: 0, scale: 0.95 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 exit={{ opacity: 0, scale: 0.95 }}
@@ -257,46 +444,67 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
                             transition={{ duration: 0.4 }}
                             className="flex flex-col gap-2"
                         >
-                            <label className="text-gray-700 dark:text-gray-300">Add Asset</label>
-                            <div className="flex gap-2">
-                                <input
-                                    type="text"
-                                    placeholder="Enter asset name"
-                                    value={newAsset}
-                                    onChange={(e) => setNewAsset(e.target.value)}
-                                    className="flex-1 p-2 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300"
-                                />
-                                <motion.button
-                                    whileTap={{ scale: 0.95 }}
-                                    onClick={handleAddAsset}
-                                    className="px-3 py-2 text-white bg-gradient-to-r from-[#59957b] to-[#456f5c] rounded-lg 
-                                        shadow-md hover:from-[#456f5c] hover:to-[#59957b]"
-                                >
-                                    Add
-                                </motion.button>
+                            <div className="flex gap-4">
+                                <div className="flex-1">
+                                    <label className="text-gray-700 dark:text-gray-300">Add Asset</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter asset name"
+                                        value={newAsset}
+                                        onChange={(e) => setNewAsset(e.target.value)}
+                                        className="p-2 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                                    />
+                                </div>
+
+                                <div className="flex-1">
+                                    <label className="text-gray-700 dark:text-gray-300">Minimum Balance</label>
+                                    <input
+                                        type="number"
+                                        placeholder="Enter minimum balance"
+                                        value={minBalance}
+                                        onChange={(e) => setMinBalance(e.target.value)}
+                                        className="p-2 rounded bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-300"
+                                    />
+                                </div>
                             </div>
+
+                            <motion.button
+                                whileTap={{ scale: 0.95 }}
+                                onClick={handleAddAsset}
+                                className="mt-2 px-3 py-2 text-white bg-gradient-to-r from-[#59957b] to-[#456f5c] rounded-lg 
+                                    shadow-md hover:from-[#456f5c] hover:to-[#59957b]"
+                            >
+                                Add Asset
+                            </motion.button>
 
                             <div className="grid grid-cols-2 gap-2 mt-4 overflow-y-auto max-h-64 pr-1">
                                 <AnimatePresence>
-                                    {allAssets.map((asset) => (
-                                        <motion.div
-                                            key={asset}
-                                            initial={{ opacity: 0, scale: 0.95 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{ opacity: 0, scale: 0.95 }}
-                                            className="flex justify-between items-center bg-[#e6a395] dark:bg-gray-700 p-2 rounded-md"
-                                        >
-                                            <span className="truncate text-gray-800 dark:text-gray-300">{asset}</span>
-                                            <X
-                                                size={20}
-                                                color="#cd5e48"
-                                                className="cursor-pointer hover:opacity-80"
-                                                onClick={() => handleDeleteAsset(asset)}
-                                            />
-                                        </motion.div>
-                                    ))}
+                                    {allAssets.length > 0 ? (
+                                        allAssets.map((asset) => (
+                                            <motion.div
+                                                key={asset.id} // Fallback to name if no id exists
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{ opacity: 0, scale: 0.95 }}
+                                                className="flex justify-between items-center bg-[#e6a395] dark:bg-gray-700 p-2 rounded-md"
+                                            >
+                                                <span className="truncate text-gray-800 dark:text-gray-300">
+                                                    {asset.name}
+                                                </span>
+                                                <X
+                                                    size={20}
+                                                    color="#cd5e48"
+                                                    className="cursor-pointer hover:opacity-80"
+                                                    onClick={() => handleDeleteAsset(asset.name)}
+                                                />
+                                            </motion.div>
+                                        ))
+                                    ) : (
+                                        <p className="text-gray-500 dark:text-gray-400">No assets added.</p>
+                                    )}
                                 </AnimatePresence>
                             </div>
+
                             {assetErrorMessage && (
                                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded mb-2">
                                     {assetErrorMessage}
@@ -306,7 +514,7 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
                     )}
                 </div>
 
-                {/* Close Button (Sticky Bottom) */}
+                {/* Close Button */}
                 <motion.button
                     whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.97 }}

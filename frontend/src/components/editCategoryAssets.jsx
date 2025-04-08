@@ -31,10 +31,37 @@ const EditCategoriesAssets = ({
     userCategories = userCategories || defaultUserCategories;
 
     // Function to add income/expense category
-    const handleAddCategory = () => {
+    const handleAddCategory = async () => {
+        console.log("handleAddCategory called")
         if (!newCategory.trim()) return;
 
-        setUserCategories((prev) => {
+        try {
+            console.log("Adding category:", newCategory.trim(), "Type:", selectedType); // ✅ DEBUG
+            const response = await fetch("/api/categories/add", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify({
+                    name: newCategory.trim(),
+                    type: selectedType,
+                }),
+            });
+            console.log("Response from server:", response); // ✅ DEBUG
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Category added successfully:", data); // ✅ DEBUG
+                setUserCategories((prev) => ({
+                    ...prev,
+                    [selectedType]: [...(prev[selectedType] || []), data.name],
+                }));
+                setNewCategory("");
+            }
+        } catch (error) {
+            console.error("Error adding category:", error);
+        }
+        {/*setUserCategories((prev) => {
             const updatedCategories = {
                 ...prev,
                 [selectedType]: [...(prev[selectedType] || []), newCategory.trim()],
@@ -43,11 +70,12 @@ const EditCategoriesAssets = ({
             return updatedCategories;
         });
 
-        setNewCategory("");
+        setNewCategory("");*/}
     };
 
     // Function to add asset category
     const handleAddAsset = () => {
+        console.log("handleAddAsset called");
         if (!newAsset.trim()) return;
 
         setUserCategories((prev) => {
@@ -64,6 +92,7 @@ const EditCategoriesAssets = ({
 
     // Function to delete a category (income/expense)
     const handleDeleteCategory = (categoryToDelete) => {
+        console.log("handleDeleteCategory called");
         setUserCategories((prev) => {
             const updatedCategories = {
                 ...prev,
@@ -91,6 +120,7 @@ const EditCategoriesAssets = ({
 
     // Function to delete an asset category
     const handleDeleteAsset = (assetToDelete) => {
+        console.log("handleDeleteAsset called");
         setUserCategories((prev) => {
             const updatedCategories = {
                 ...prev,
@@ -170,7 +200,10 @@ const EditCategoriesAssets = ({
                             className="w-full p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-300"
                         />
                         <button
-                            onClick={handleAddCategory}
+                            onClick={() => {
+                                console.log("Add Category button clicked"); // ✅ DEBUG
+                                handleAddCategory();
+                            }}
                             className="px-3 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg"
                         >
                             Add

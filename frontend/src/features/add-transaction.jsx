@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { LuPencil } from "react-icons/lu";
 import EditCategoriesAssets from "../components/editCategoryAssets";
 import EditSample from "../components/editSample";
+import fetchUserCategories from "../libs/api/fetchUserCategories"; // ✅ correct path to frontend API helper
 
 const AddTransaction = ({ onAddTransaction }) => {
     const [transactionType, setTransactionType] = useState("");
@@ -14,9 +15,9 @@ const AddTransaction = ({ onAddTransaction }) => {
     const [formError, setFormError] = useState("");
 
     // Default categories
-    const incomeCategories = ["Salary", "Freelance", "Investments", "Bonus", "Other"];
-    const expenseCategories = ["Food", "Transport", "Rent", "Entertainment", "Other"];
-    const assetsCategories = ["Cash", "Card", "Other"];
+    const incomeCategories = [];
+    const expenseCategories = [];
+    const assetsCategories = [];
 
     const getCategories = () => {
         return transactionType === "income"
@@ -35,6 +36,83 @@ const AddTransaction = ({ onAddTransaction }) => {
         setUserCategories(storedCategories);
         setCategory("");
         setAsset("");
+    }, [transactionType]);
+
+    const fetchAllCategories = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/api/categories/category", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            const data = await response.json();
+
+            // Normalize the data structure to handle both array of strings and array of objects
+            const normalizeCategories = (categories) => {
+                if (!categories) return [];
+                return categories.map(cat => typeof cat === 'string' ? cat : cat.cat_name || cat.name || cat);
+            };
+
+            return {
+                income: normalizeCategories(data.income),
+                expense: normalizeCategories(data.expense),
+                assets: normalizeCategories(data.assets),
+            };
+
+        } catch (error) {
+            console.error("Error fetching categories:", error);
+            // Return default empty categories in case of error
+            return {
+                income: [],
+                expense: [],
+                assets: [],
+            };
+        }
+    };
+
+    const fetchAllAssets = async () => {
+        try {
+            const response = await fetch("http://localhost:5000/api/assets/asset", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await response.json();
+
+            const normalizeAssets = (assets) => {
+                if (!assets) return [];
+                return assets.map(asset => {
+                    return {
+                        id: asset.id || asset.asset_id || generateUniqueId(),
+                        name: asset.name || asset.asset_name,
+                        minBal: asset.minimum_balance || 0
+                    };
+                });
+            };
+            return normalizeAssets(data.assets || []);
+        } catch (error) {
+            console.error("Error fetching assets:", error);
+            return [];
+        }
+    }
+
+    useEffect(() => {
+        const loadCategories = async () => {
+            const fetchedCategories = await fetchAllCategories();
+            const fetchedAssets = await fetchAllAssets();
+            setUserCategories({
+                income: fetchedCategories.income,
+                expense: fetchedCategories.expense,
+                assets: fetchedAssets
+            });
+        };
+
+        loadCategories();
     }, [transactionType]);
 
     const handleSubmit = (e) => {
@@ -131,7 +209,7 @@ const AddTransaction = ({ onAddTransaction }) => {
                     >
                         <option value="">--Select Asset--</option>
                         {getAssets().map((assetName, index) => (
-                            <option key={index} value={assetName}>{assetName}</option>
+                            <option key={assetName.id} value={assetName.name}>{assetName.name}</option>
                         ))}
                     </select>
                 </div>

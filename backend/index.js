@@ -3,7 +3,9 @@ import express from "express";
 import dotenv from "dotenv";
 
 import routes from "./routes/index.js"; 
-import authRoutes from "./routes/authRoutes.js"; // Moved from server.js
+import authRoutes from "./routes/authRoutes.js";
+import categoryRoutes from "./routes/categoryRoutes.js";
+import assets from "./routes/assetRoutes.js";
 
 dotenv.config();
 
@@ -17,6 +19,8 @@ app.use(express.urlencoded({ extended: true }));
 // Consolidating routes
 app.use("/api", routes);
 app.use("/api/auth", authRoutes); // Merged from server.js
+app.use("/api/categories", categoryRoutes);
+app.use("/api/assets", assets);
 
 // Handle 404 errors
 app.use("*", (req, res) => {

@@ -55,11 +55,14 @@ const SignIn = () => {
                 toast.success(res?.message, { duration: 1000 });
                 const userInfo = { ...res?.user, token: res.token };
                 localStorage.setItem("user", JSON.stringify(userInfo));
+                localStorage.setItem("token", res.token);
                 setCredentials(userInfo);
+                console.log("Received token from backend:", res.token); // ✅ DEBUG
                 setTimeout(() => {
                     navigate("/dashboard");
                 }, 1500);
             }
+
         } catch (error) {
             console.error("Login error:", error);
             toast.error(error?.response?.data?.message || error.message, { duration: 1000 });

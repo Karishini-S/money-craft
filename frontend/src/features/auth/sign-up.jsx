@@ -76,7 +76,7 @@ const SignUp = () => {
         try {
             setLoading(true);
             const { data: res } = await api.post("/auth/sign-up", data)
-            if (res?.user) {
+            if (res?.userId) {
                 toast.success("Account created successfully! You can now login.", { duration: 1000 })
                 setTimeout(() => {
                     navigate("/sign-in");
