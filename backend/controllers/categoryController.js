@@ -7,7 +7,6 @@ export const fetchCategories = async (req, res) => {
         return res.status(400).json({ message: "User not found in token" });
       }
       const { income, expense } = await getUserCategories(userId);
-      //console.log("Categories found:", categories);
 
       res.status(200).json({ income, expense, assets: [] });
     } catch (error) {

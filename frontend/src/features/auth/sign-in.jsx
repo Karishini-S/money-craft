@@ -7,12 +7,13 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { SocialAuth } from '../../components/social-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/card';
 import Input from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button.jsx';
 import { BiLoader } from 'react-icons/bi';
 import { FiEye, FiEyeOff } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import api from '../../libs/apiCall';
+import LogoBrand from '../../components/logoBrand';
 
 const LoginSchema = z.object({
     email: z
@@ -57,7 +58,6 @@ const SignIn = () => {
                 localStorage.setItem("user", JSON.stringify(userInfo));
                 localStorage.setItem("token", res.token);
                 setCredentials(userInfo);
-                console.log("Received token from backend:", res.token); // ✅ DEBUG
                 setTimeout(() => {
                     navigate("/dashboard");
                 }, 1500);

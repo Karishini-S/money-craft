@@ -8,7 +8,7 @@ import { SocialAuth } from '../../components/social-auth';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '../../components/ui/card';
 import { Separator } from '../../components/separator';
 import Input from '../../components/ui/input';
-import { Button } from '../../components/ui/button';
+import { Button } from '../../components/ui/Button';
 import { Checkbox } from '../../components/ui/checkbox';
 import { BiLoader } from 'react-icons/bi';
 import { FiEye, FiEyeOff, FiAlertCircle } from 'react-icons/fi';
@@ -17,6 +17,7 @@ import { Alert, AlertDescription } from '../../components/ui/alert';
 import { Link } from 'react-router-dom';
 import { toast } from "sonner";
 import api from '../../libs/apiCall';
+import LogoBrand from '../../components/logoBrand';
 
 const RegisterSchema = z.object({
     username: z

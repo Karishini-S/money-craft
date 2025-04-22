@@ -27,8 +27,8 @@ export async function getUserCategories(userId) {
     const expenseResult = await pool.query(
         `SELECT * FROM user_category WHERE user_id=$1 AND cat_type='expense'`, [userId]
     );
-    const income = [...defaultIncomeCategories.rows, ...incomeResult.rows];
-    const expense = [...defaultExpenseCategories.rows, ...expenseResult.rows]
+    const income = [/*...defaultIncomeCategories.rows, */...incomeResult.rows];
+    const expense = [/*...defaultExpenseCategories.rows, */...expenseResult.rows]
     return { income, expense };
     /*const result = await pool.query(
       `SELECT 

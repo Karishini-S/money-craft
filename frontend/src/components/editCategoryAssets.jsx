@@ -32,11 +32,9 @@ const EditCategoriesAssets = ({
 
     // Function to add income/expense category
     const handleAddCategory = async () => {
-        console.log("handleAddCategory called")
         if (!newCategory.trim()) return;
 
         try {
-            console.log("Adding category:", newCategory.trim(), "Type:", selectedType); // ✅ DEBUG
             const response = await fetch("/api/categories/add", {
                 method: "POST",
                 headers: {
@@ -48,10 +46,8 @@ const EditCategoriesAssets = ({
                     type: selectedType,
                 }),
             });
-            console.log("Response from server:", response); // ✅ DEBUG
             if (response.ok) {
                 const data = await response.json();
-                console.log("Category added successfully:", data); // ✅ DEBUG
                 setUserCategories((prev) => ({
                     ...prev,
                     [selectedType]: [...(prev[selectedType] || []), data.name],
@@ -75,7 +71,6 @@ const EditCategoriesAssets = ({
 
     // Function to add asset category
     const handleAddAsset = () => {
-        console.log("handleAddAsset called");
         if (!newAsset.trim()) return;
 
         setUserCategories((prev) => {
@@ -92,7 +87,6 @@ const EditCategoriesAssets = ({
 
     // Function to delete a category (income/expense)
     const handleDeleteCategory = (categoryToDelete) => {
-        console.log("handleDeleteCategory called");
         setUserCategories((prev) => {
             const updatedCategories = {
                 ...prev,
@@ -120,7 +114,6 @@ const EditCategoriesAssets = ({
 
     // Function to delete an asset category
     const handleDeleteAsset = (assetToDelete) => {
-        console.log("handleDeleteAsset called");
         setUserCategories((prev) => {
             const updatedCategories = {
                 ...prev,
@@ -201,7 +194,6 @@ const EditCategoriesAssets = ({
                         />
                         <button
                             onClick={() => {
-                                console.log("Add Category button clicked"); // ✅ DEBUG
                                 handleAddCategory();
                             }}
                             className="px-3 py-2 text-white bg-green-600 hover:bg-green-700 rounded-lg"

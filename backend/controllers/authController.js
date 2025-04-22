@@ -30,7 +30,7 @@ export const signupUser = async (req, res) => {
         const hashedPwd = await hashPassword(password);
         const userId = await createUser(email, username, hashedPwd);
         await createProfile(userId);
-        //await assignDefaultCategoriesToUser(userId);
+        await assignDefaultCategoriesToUser(userId);
         await assignDefaultAssetsToUser(userId);
         /*const defaultCategories = await pool.query(
             "SELECT category_name, category_type FROM category WHERE user_id = 0"

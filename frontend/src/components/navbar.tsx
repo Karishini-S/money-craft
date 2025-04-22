@@ -13,11 +13,12 @@ import { IoIosMenu } from "react-icons/io";
 import { MdNotifications, MdOutlineKeyboardArrowDown } from "react-icons/md";
 import ThemeSwitch from "./switch";
 import TransitionWrapper from "./wrappers/transition-wrapper";
+import LogoBrand from "./logoBrand";
 
 const links = [
     { label: "Home", link: "/dashboard" },
     { label: "Transactions", link: "/transactions" },
-    { label: "Leaderboard", link: "/leaderboard" },
+    /*{ label: "Leaderboard", link: "/leaderboard" },*/
     { label: "Achievements", link: "/achievements" },
     { label: "Settings", link: "/settings" },
 ];
@@ -87,6 +88,7 @@ const Navbar = () => {
             await signOut(auth);
             localStorage.removeItem("user");
             setCredentials(null);
+            sessionStorage.clear();
             navigate("/sign-in");
         } catch (error) {
             console.error("Error signing out", error);
@@ -94,12 +96,8 @@ const Navbar = () => {
     };
 
     return (
-        <header className="w-full flex items-center justify-between py-4 px-6 bg-[#f2ebc6] dark:bg-slate-800 shadow-md">
-            <Link to="/" className="flex items-center gap-2">
-                <img src="logo.jpeg" alt="App Logo" className="w-10 h-10 rounded-xl object-cover scale-150 hover:scale-150" />
-                <span className="text-sm font-bold text-black dark:text-white">.</span>
-                <span className="text-xl font-bold text-black dark:text-white">Money-Craft</span>
-            </Link>
+        <header className="fixed top-0 left-0 w-full z-50 flex items-center justify-between py-4 px-6 bg-[#f2ebc6] dark:bg-slate-800 shadow-md">
+            <LogoBrand />
 
             <nav className="hidden md:flex items-center gap-6">
                 {links.map(({ label, link }) => (

@@ -67,7 +67,13 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
             // Normalize the data structure to handle both array of strings and array of objects
             const normalizeCategories = (categories) => {
                 if (!categories) return [];
-                return categories.map(cat => typeof cat === 'string' ? cat : cat.cat_name || cat.name || cat);
+                return categories.map(cat => {
+                    return {
+                        id: cat.cat_id || generateUniqueId(), // Fallback to a unique ID if not present
+                        name: cat.cat_name || cat, // Fallback to the category name if not present
+                        type: cat.cat_type || selectedType, // Fallback to the selected type if not present
+                    };
+                });
             };
 
             return {
@@ -157,7 +163,12 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
                 const data = await response.json();
                 setUserCategories((prev) => ({
                     ...prev,
-                    [selectedType]: [...(prev[selectedType] || []), data.cat_name],
+                    [selectedType]: [...(prev[selectedType] || []),
+                    {
+                        id: data.id || data.cat_id || Date.now(), // fallback in case backend misses it
+                        name: data.cat_name || data.name || newCategory.trim(),
+                        type: selectedType
+                    }],
                 }));
                 setNewCategory("");
             }
@@ -221,6 +232,10 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
     };
 
     const handleDeleteCategory = async (categoryToDelete) => {
+        if (['Salary', 'Freelance', 'Investments', 'Bonus', 'Other', 'Food', 'Transport', 'Rent', 'Entertainment'].includes(categoryToDelete)) {
+            setCategoryErrorMessage("Default categories cannot be deleted.");
+            return;
+        }
         try {
             const response = await fetch("http://localhost:5000/api/categories/delete", {
                 method: "POST",
@@ -264,6 +279,10 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
     };
 
     const handleDeleteAsset = async (assetToDelete) => {
+        if (['Cash', 'Card', 'Savings', 'Other'].includes(assetToDelete)) {
+            setAssetErrorMessage("Default assets cannot be deleted.");
+            return;
+        }
         try {
             const result = await fetch("http://localhost:5000/api/assets/delete", {
                 method: "POST",
@@ -326,15 +345,12 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
     const allCategories = [
         ...(userCategories[selectedType] || []),
     ];
+    const validCategories = allCategories.filter(cat => cat && cat.id && cat.name && cat.type);
 
     const allAssets = [
         //...defaultAssetCategories.filter((cat) => !(removedCategories.assets || []).includes(cat)),
         ...(userCategories.assets || []),
     ];
-
-    console.log("User categories:", userCategories);
-    console.log("allCategories", allCategories);
-    console.log("allAssets:", allAssets);
 
     return (
         <AnimatePresence mode="wait">
@@ -408,21 +424,21 @@ const EditSample = ({ closeModal, userCategories, setUserCategories }) => {
 
                             <div className="grid grid-cols-2 gap-2 mt-4 overflow-y-auto max-h-40 pr-1">
                                 <AnimatePresence>
-                                    {allCategories.length > 0 ? (
-                                        allCategories.map((cat) => (
+                                    {validCategories.length > 0 ? (
+                                        validCategories.map((cat) => (
                                             <motion.div
-                                                key={`${selectedType}-${cat.cat_id}`}
+                                                key={`${selectedType}-${cat.id}-${cat.name}`}
                                                 initial={{ opacity: 0, scale: 0.95 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 exit={{ opacity: 0, scale: 0.95 }}
                                                 className="flex justify-between items-center bg-[#e6a395] dark:bg-gray-700 p-2 rounded-md"
                                             >
-                                                <span className="truncate text-gray-800 dark:text-gray-300">{cat}</span>
+                                                <span className="truncate text-gray-800 dark:text-gray-300">{cat.name}</span>
                                                 <X
                                                     size={20}
                                                     color="#cd5e48"
                                                     className="cursor-pointer hover:opacity-80"
-                                                    onClick={() => handleDeleteCategory(cat)}
+                                                    onClick={() => handleDeleteCategory(cat.name)}
                                                 />
                                             </motion.div>
                                         ))

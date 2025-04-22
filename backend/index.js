@@ -6,6 +6,7 @@ import routes from "./routes/index.js";
 import authRoutes from "./routes/authRoutes.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import assets from "./routes/assetRoutes.js";
+import transactionRoutes from "./routes/transactionRoutes.js"
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use("/api", routes);
 app.use("/api/auth", authRoutes); // Merged from server.js
 app.use("/api/categories", categoryRoutes);
 app.use("/api/assets", assets);
+app.use("/api/transactions", transactionRoutes)
 
 // Handle 404 errors
 app.use("*", (req, res) => {

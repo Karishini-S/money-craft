@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { LuPencil } from "react-icons/lu";
+import { toast } from "sonner"
 import EditCategoriesAssets from "../components/editCategoryAssets";
 import EditSample from "../components/editSample";
 import fetchUserCategories from "../libs/api/fetchUserCategories"; // ✅ correct path to frontend API helper
@@ -8,6 +9,7 @@ const AddTransaction = ({ onAddTransaction }) => {
     const [transactionType, setTransactionType] = useState("");
     const [amount, setAmount] = useState("");
     const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+    const [selectedAsset, setSelectedAsset] = useState(null);
     const [asset, setAsset] = useState("");
     const [category, setCategory] = useState("");
     const [userCategories, setUserCategories] = useState({ income: [], expense: [], assets: [] });
@@ -90,6 +92,7 @@ const AddTransaction = ({ onAddTransaction }) => {
                     return {
                         id: asset.id || asset.asset_id || generateUniqueId(),
                         name: asset.name || asset.asset_name,
+                        curBal: asset.current_balance || 0,
                         minBal: asset.minimum_balance || 0
                     };
                 });
@@ -110,12 +113,18 @@ const AddTransaction = ({ onAddTransaction }) => {
                 expense: fetchedCategories.expense,
                 assets: fetchedAssets
             });
+            setAsset(fetchedAssets);
         };
 
         loadCategories();
     }, [transactionType]);
 
-    const handleSubmit = (e) => {
+    const handleAssetChange = (selectedAssetName) => {
+        const matchedAsset = userCategories.assets.find((a) => a.name === selectedAssetName);
+        setSelectedAsset(matchedAsset || null);
+    };
+
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!transactionType) return setFormError("Please select a transaction type.");
         if (!category) return setFormError("Please select a category.");
@@ -134,6 +143,52 @@ const AddTransaction = ({ onAddTransaction }) => {
             category,
             asset
         };
+
+        const payload = {
+            amount: finalAmount,
+            date,
+            category,
+            asset
+        };
+
+        const available = Number(selectedAsset.curBal) - Number(selectedAsset.minBal);
+        if (transactionType === "expense" && amount > available) {
+            toast.error("Not enough available balance in selected asset!");
+            return;
+        }
+
+        try {
+            const endpoint = transactionType === "income"
+                ? "http://localhost:5000/api/transaction/income"
+                : "http://localhost:5000/api/transaction/expense";
+
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setFormError(data.message || "Failed to add transaction.");
+                return;
+            }
+
+            // Reset form
+            setTransactionType("");
+            setAmount("");
+            setCategory("");
+            setAsset("");
+            setSelectedAsset(null);
+
+        } catch (error) {
+            console.error("Error submitting transaction:", error);
+            setFormError("Something went wrong.");
+        }
 
         onAddTransaction(newTransaction);
         setTransactionType("");
@@ -204,7 +259,11 @@ const AddTransaction = ({ onAddTransaction }) => {
                     <label className="text-gray-700 dark:text-gray-300 block mb-1">Asset</label>
                     <select
                         value={asset}
-                        onChange={(e) => setAsset(e.target.value)}
+                        onChange={(e) => {
+                            const selected = e.target.value;
+                            setAsset(selected);
+                            handleAssetChange(selected); // <- your custom logic
+                        }}
                         className="w-full p-2 rounded text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700"
                     >
                         <option value="">--Select Asset--</option>
@@ -213,6 +272,12 @@ const AddTransaction = ({ onAddTransaction }) => {
                         ))}
                     </select>
                 </div>
+
+                {selectedAsset && (
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 italic">
+                        Available Balance: ${Number(selectedAsset.curBal) - Number(selectedAsset.minBal)}
+                    </p>
+                )}
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>

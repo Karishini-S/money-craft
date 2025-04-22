@@ -16,14 +16,19 @@ const SpendingAnalytics = ({ transactions = [] }) => {
                 <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-white">
                     Spending Analytics
                 </h2>
-                <p className="text-gray-500 dark:text-gray-400">No spending data available.</p>
+                <p className="text-gray-500 dark:text-gray-400">No spending data available. Add a transaction to get started!</p>
             </div>
         );
     }
 
     // 🔹 Calculate Total Income & Expense
-    const totalIncome = transactions.filter(txn => txn.amount > 0).reduce((sum, txn) => sum + txn.amount, 0);
-    const totalExpense = Math.abs(transactions.filter(txn => txn.amount < 0).reduce((sum, txn) => sum + txn.amount, 0));
+    const totalIncome = transactions
+        .filter((txn) => txn.type === 'income')
+        .reduce((sum, txn) => sum + Number(txn.amount), 0);
+
+    const totalExpense = transactions
+        .filter((txn) => txn.type === 'expense')
+        .reduce((sum, txn) => sum + Number(txn.amount), 0);
 
     const incomeExpenseData = [
         { name: "Income", value: totalIncome },
@@ -31,20 +36,26 @@ const SpendingAnalytics = ({ transactions = [] }) => {
     ];
 
     // 🔹 Group Category-wise Income
-    const categoryIncomeData = transactions.filter(txn => txn.amount > 0).reduce((acc, txn) => {
-        const existing = acc.find(entry => entry.name === txn.category);
-        if (existing) existing.value += txn.amount;
-        else acc.push({ name: txn.category, value: txn.amount });
-        return acc;
-    }, []);
+    const categoryIncomeData = transactions
+        .filter(txn => txn.type === "income")
+        .reduce((acc, txn) => {
+            const existing = acc.find(entry => entry.name === txn.category);
+            if (existing) existing.value += Number(txn.amount);
+            else acc.push({ name: txn.category, value: Number(txn.amount) });
+            return acc;
+        }, []);
+
 
     // 🔹 Group Category-wise Expense
-    const categoryExpenseData = transactions.filter(txn => txn.amount < 0).reduce((acc, txn) => {
-        const existing = acc.find(entry => entry.name === txn.category);
-        if (existing) existing.value += Math.abs(txn.amount);
-        else acc.push({ name: txn.category, value: Math.abs(txn.amount) });
-        return acc;
-    }, []);
+    const categoryExpenseData = transactions
+        .filter(txn => txn.type === "expense")
+        .reduce((acc, txn) => {
+            const existing = acc.find(entry => entry.name === txn.category);
+            if (existing) existing.value += Number(txn.amount);
+            else acc.push({ name: txn.category, value: Number(txn.amount) });
+            return acc;
+        }, []);
+
 
     // 🔹 Function to group small categories into "Others"
     const groupSmallCategories = (data) => {
@@ -82,6 +93,7 @@ const SpendingAnalytics = ({ transactions = [] }) => {
     };
 
     const chartData = getChartData();
+    const isDarkMode = localStorage.getItem("theme");
 
     return (
         <div className="p-6 bg-[#f2ebc6] dark:bg-slate-800 rounded-lg shadow-md transition-all duration-300"
@@ -130,7 +142,12 @@ const SpendingAnalytics = ({ transactions = [] }) => {
                             ))}
                         </Pie>
                         <Tooltip
-                            contentStyle={{ backgroundColor: "#1e293b", color: "#e5e7eb", borderRadius: "8px" }}
+                            contentStyle={{
+                                backgroundColor: isDarkMode === 'dark' ? "#1e293b" : "#ffffff",
+                                color: isDarkMode === 'dark' ? "#e5e7eb" : "#1e293b",
+                                borderRadius: "8px",
+                                border: "1px solid #ccc",
+                            }}
                             formatter={(value) => `$${value.toFixed(2)}`}
                         />
                         <Legend verticalAlign="bottom" align="center" />
@@ -149,7 +166,7 @@ const SpendingAnalytics = ({ transactions = [] }) => {
                                     className="inline-block w-3 h-3 rounded-full"
                                     style={{ backgroundColor: index < COLORS.length ? COLORS[index] : generateColor(index) }}
                                 ></span>
-                                <span>{entry.name}: ${entry.value.toFixed(2)}</span>
+                                <span>{entry.name}: ${Number(entry.value).toFixed(2)}</span>
                             </li>
                         ))}
                     </ul>

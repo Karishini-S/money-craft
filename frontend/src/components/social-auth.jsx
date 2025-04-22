@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import api from "../libs/apiCall";
 import { auth } from "../libs/firebaseConfig";
 import useStore from "../store";
-import { Button } from "./ui/button";
+import { Button } from "./ui/Button";
 
 export const SocialAuth = ({ isLoading, setLoading }) => {
     const [user] = useAuthState(auth);
