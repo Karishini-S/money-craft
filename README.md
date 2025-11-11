@@ -44,20 +44,21 @@ Money-Craft is a gamified expense management system that helps users track incom
 
 5. Update Firebase Configuration  
    Open the file `frontend/src/libs/firebaseConfig.js`  and replace the `firebaseConfig` object with the following:
-
+   
     ```js
     const firebaseConfig = {
-      apiKey: "AIzaSyCctzjInJXsFezn8yPvjdZsj8He5O7y1Gs",
-      authDomain: "money-craft-dc62c.firebaseapp.com",
-      projectId: "money-craft-dc62c",
-      storageBucket: "money-craft-dc62c.firebasestorage.app",
-      messagingSenderId: "349273513357",
-      appId: "1:349273513357:web:4a83daeb1a5e7f0f93b1c4",
-      measurementId: "G-WLPR85BJ43"
+      apiKey: "",
+      authDomain: "",
+      projectId: "",
+      storageBucket: "",
+      messagingSenderId: "",
+      appId: "",
+      measurementId: ""
     };
     ```
+    Note: Fill in the above fields with your actual Firebase project credentials, which can be found in your Firebase Console under **Project Settings → General → Your Apps → Firebase SDK snippet**.
    
-6.  Start the frontend server
+7.  Start the frontend server
 
     ```bash
     npm run dev
